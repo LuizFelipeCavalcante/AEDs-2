@@ -8,9 +8,10 @@ class alteracaoAleatoria{
                 int n = str.length();
                 char a, b;
                 String result = "";
-                 Random gerador = new Random();
+                Random gerador = new Random();
                 gerador.setSeed(4);
 		a = (char)('a' + (Math.abs(gerador.nextInt()) % 26));
+		MyIO.println(a);
 		b = (char)('a' + (Math.abs(gerador.nextInt()) % 26));
                 
 		for(int i = 0; i < n; i++){
