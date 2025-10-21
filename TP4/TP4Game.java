@@ -1,6 +1,8 @@
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 
-public class Game{
+/*  public class Game{
 
     private int id;
     private String name;
@@ -81,9 +83,40 @@ public class Game{
         this.id = id;
     }
 }
+*/
 
 public class TP4Game{
+    public static String lerId(String linha){
+        int i = 0;
+        String resultado = "";
+        while(linha.charAt(i) != ','){
+            resultado = resultado + linha.charAt(i);
+            i++;
+        }
+        return resultado;
+    }
+
     public static void main(String[] args) {
-        System.in.read();
+        Scanner scanner = new Scanner(System.in);
+        String chave = scanner.nextLine();
+
+        File file = new File("games.csv");
+        Scanner scanearArquivo = null;
+
+        try{
+        scanearArquivo = new Scanner(file);
+       } catch(FileNotFoundException e){
+            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+            e.printStackTrace();
+            return;
+       }
+       
+       String linha = scanearArquivo.nextLine();
+
+       while(!(lerId(linha).equals(chave))){
+        linha = scanearArquivo.nextLine();
+       }
+        System.out.println(linha);
+        
     }
 }
