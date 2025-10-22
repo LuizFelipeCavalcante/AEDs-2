@@ -121,55 +121,65 @@ import java.io.FileNotFoundException;
         String str = removeAspas(supportedLanguages);
         supportedLanguages = removeColchete(str);
         str = removeAspasSimples(supportedLanguages);
-        for(int i =  0; i < separadorVirgula(str).length; i++){
-            this.supportedLanguages[i] = separadorVirgula(str)[i];
+        supportedLanguages = removeEspacoEntreVirgulas(str);
+        String[] partes = separadorVirgula(supportedLanguages);
+
+        int tam = partes.length;
+        this.supportedLanguages = new String[tam];
+
+        for(int i =  0; i < tam; i++){
+            this.supportedLanguages[i] = partes[i];
         }
     }
 
-    /*
-    public void setMetacriticScore(string metacriticScore){
-        this.metacriticScore = metacriticScore;
-    }
     
-    public void setUserScore(string userScore){
-        this.userScore = userScore;
+    public void setMetacriticScore(String metacriticScore){
+        this.metacriticScore = Integer.parseInt(metacriticScore);
     }
+
     
-    public void setAchievement(string achievements){
-        this.achievements = achievements;
+    public void setUserScore(String userScore){
+        if(userScore.equals("") || userScore.equals("tbd")){
+            this.userScore = -1.00f;
+        }else{
+             this.userScore = Float.parseFloat(userScore);
+        }
     }
-    
-    public void setId(string id){
-        this.id = id;
+
+   
+    public void setAchievement(String achievements){
+        if(achievements.equals("")){
+            this.achievements = 0;
+        }
+        this.achievements = Integer.parseInt(achievements);
     }
+
+     
+    // public void setPublisher(String publishers){
+    //     this.publishers = publishers;
+    // }
     
-    public void setId(string id){
-        this.id = id;
-    }
+    // public void setDevelopers(String developers){
+    //     this.developers = developers;
+    // }
     
-    public void setId(string id){
-        this.id = id;
-    }
+    // public void setCategories(String categories){
+    //     this.categories = categories;
+    // }
     
-    public void setId(string id){
-        this.id = id;
-    }
+    // public void setGenres(String genres){
+    //     this.genres = genres;
+    // }
     
-    public void setId(string id){
-        this.id = id;
-    }
+    // public void setTags(String tags){
+    //     this.tags = tags;
+    // }
     
-    public void setId(string id){
-        this.id = id;
-    }
-    
-    public void setId(string id){
-        this.id = id;
-    } */
 
     public void imprimir(){
         System.out.println(String.valueOf(this.id) + " "+ this.name + " " + this.releaseDate + " " + String.valueOf(this.estimatedOwners)
-        + " " + String.valueOf(this.price) + " " + imprimirArray(this.supportedLanguages));
+        + " " + String.valueOf(this.price) + " " + imprimirArray(this.supportedLanguages) + " " + String.valueOf(this.metacriticScore)
+        + " " + String.valueOf(this.userScore) + " " + String.valueOf(this.achievements));
 
 
 
@@ -179,7 +189,7 @@ import java.io.FileNotFoundException;
     private String imprimirArray(String[] str){
         String resultado = "";
         for(int i = 0; i < str.length; i++){
-            resultado = resultado + str[i];
+            resultado = resultado + str[i] + " ";
         }
         return resultado;
     }
@@ -188,7 +198,7 @@ import java.io.FileNotFoundException;
         String resultado = "";
          for(int i = 0; i < str.length(); i++){
             if(str.charAt(i) != '"'){
-                resultado = resultado + str.charAt(i) + " ";
+                resultado = resultado + str.charAt(i);
             }
         }
         return resultado;
@@ -207,12 +217,30 @@ import java.io.FileNotFoundException;
     private String removeColchete(String str){
         String resultado = "";
          for(int i = 0; i < str.length(); i++){
-            if(str.charAt(i) != '[' || str.charAt(i) != ']'){
+            if(!(str.charAt(i) == '[' || str.charAt(i) == ']')){
                 resultado = resultado + str.charAt(i);
             }
         }
         return resultado;
     }
+
+    private String removeEspacoEntreVirgulas(String str){
+         String resultado = "";
+         int virgula = 0;
+         for(int i = 0; i < str.length(); i++){
+            if(str.charAt(i) == ','){
+                virgula ++;
+                resultado = resultado + str.charAt(i);
+            }else if(virgula == 1 && str.charAt(i) == ' '){
+                virgula = 0;
+            }else{
+                resultado = resultado + str.charAt(i);
+            }
+
+            
+        }
+        return resultado;
+    }   
 
     private String[] separadorVirgula(String str){
         int tam = 0;
@@ -222,10 +250,10 @@ import java.io.FileNotFoundException;
             }
         }
 
-        String[] resultado = new String[tam-1];
+        String[] resultado = new String[tam+1];
         int j = 0;
 
-        for(int i = 0; j < str.length(); i++){
+        for(int i = 0; i < resultado.length; i++){
             resultado[i] = "";
 
         while((j < str.length()) && (str.charAt(j) != ',')){
@@ -274,7 +302,7 @@ public class TP4Game{
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String chave = "1172470"; //scanner.nextLine();
+        String chave = "40800"; //scanner.nextLine();
 
         File file = new File("games.csv");
         Scanner scanearArquivo = null;
@@ -292,14 +320,24 @@ public class TP4Game{
        while(!(lerId(linha).equals(chave))){
         linha = scanearArquivo.nextLine();
        }
-    //    System.out.println(linha); // so pra teste
+       System.out.println(linha); // so pra teste
        Game game = new Game();
         game.setId(separador(linha)[0]);
         game.setName(separador(linha)[1]);
         game.setReleaseDate(separador(linha)[2]);
         game.setEstimatedOwners(separador(linha)[3]);
         game.setPrice(separador(linha)[4]);
-        System.out.println(separador(linha)[5]);
+        game.setSupportedLanguages(separador(linha)[5]);
+        game.setMetacriticScore(separador(linha)[6]);
+        game.setUserScore(separador(linha)[7]);
+        game.setAchievement(separador(linha)[8]);
+        game.setPublisher(separador(linha)[9]);
+        game.setDevelopers(separador(linha)[10]);
+        game.setCategories(separador(linha)[11]);
+        game.setGenres(separador(linha)[12]);
+        game.setTags(separador(linha)[13]);
+
+        // System.out.println(separador(linha)[9]);
        game.imprimir();
         
     }
