@@ -155,41 +155,103 @@ import java.io.FileNotFoundException;
     }
 
      
-    // public void setPublisher(String publishers){
-    //     this.publishers = publishers;
-    // }
+    public void setPublisher(String publishers){
+        String str = removeAspas(publishers);
+
+        
+        String[] partes = separadorVirgula(str);
+
+        this.publishers = new String[partes.length];
+        for(int i = 0; i < partes.length; i++){
+            
+            this.publishers[i] = partes[i];
+            // System.out.println(this.publishers[i] + ".");
+        }
+        
+    }
     
-    // public void setDevelopers(String developers){
-    //     this.developers = developers;
-    // }
+    public void setDevelopers(String developers){
+         String str = removeAspas(developers);
+
+
+        String[] partes = separadorVirgula(str);
+
+        this.developers = new String[partes.length];
+        for(int i = 0; i < partes.length; i++){
+
+            this.developers[i] = partes[i];
+
+        }
+    }
     
-    // public void setCategories(String categories){
-    //     this.categories = categories;
-    // }
+    public void setCategories(String categories){
+        String str = removeAspas(categories);
+        categories = removeColchete(str);
+        str = removeAspasSimples(categories);
+        categories = removeEspacoEntreVirgulas(str);
+        String[] partes = separadorVirgula(categories);
+
+        int tam = partes.length;
+        this.categories = new String[tam];
+
+        for(int i =  0; i < tam; i++){
+            this.categories[i] = partes[i];
+        }
+    }
     
-    // public void setGenres(String genres){
-    //     this.genres = genres;
-    // }
+    public void setGenres(String genres){
+        String str = removeAspas(genres);
+        genres = removeColchete(str);
+        str = removeAspasSimples(genres);
+        genres = removeEspacoEntreVirgulas(str);
+        String[] partes = separadorVirgula(genres);
+
+        int tam = partes.length;
+        this.genres = new String[tam];
+
+        for(int i =  0; i < tam; i++){
+            this.genres[i] = partes[i];
+        }
+    }
     
-    // public void setTags(String tags){
-    //     this.tags = tags;
-    // }
+    public void setTags(String tags){
+        String str = removeAspas(tags);
+        tags = removeColchete(str);
+        str = removeAspasSimples(tags);
+        tags = removeEspacoEntreVirgulas(str);
+        String[] partes = separadorVirgula(tags);
+
+        int tam = partes.length;
+        this.tags = new String[tam];
+
+        for(int i =  0; i < tam; i++){
+            this.tags[i] = partes[i];
+        }
+    }
     
 
     public void imprimir(){
-        System.out.println(String.valueOf(this.id) + " "+ this.name + " " + this.releaseDate + " " + String.valueOf(this.estimatedOwners)
-        + " " + String.valueOf(this.price) + " " + imprimirArray(this.supportedLanguages) + " " + String.valueOf(this.metacriticScore)
-        + " " + String.valueOf(this.userScore) + " " + String.valueOf(this.achievements));
-
-
-
-
+        String e = " ## ";
+        System.out.println("=> "+ String.valueOf(this.id) + e + this.name + e + this.releaseDate + e + String.valueOf(this.estimatedOwners)
+        + e + String.valueOf(this.price) + e + "[" + imprimirArrayVirgula(this.supportedLanguages) + "]" + e + String.valueOf(this.metacriticScore)
+        + e + String.valueOf(this.userScore) + e + String.valueOf(this.achievements) + e + "["+ imprimirArray(this.publishers)+"]"
+        + e + "["+ imprimirArray(this.developers) + "]"+ e +"[" +imprimirArrayVirgula(this.categories) +"]" +e + "["+imprimirArray(this.genres) + "]"+e + "[" + imprimirArrayVirgula(this.tags)+"]");
     }
 
     private String imprimirArray(String[] str){
         String resultado = "";
         for(int i = 0; i < str.length; i++){
-            resultado = resultado + str[i] + " ";
+            if(i == str.length-1){resultado = resultado + str[i];}
+            else{resultado = resultado + str[i] + " ";}
+        }
+        return resultado;
+    }
+
+    private String imprimirArrayVirgula(String[] str){
+        String resultado = "";
+        for(int i = 0; i < str.length; i++){
+            if(i == str.length-1){resultado = resultado + str[i];}
+            else{resultado = resultado + str[i] + ", ";}
         }
         return resultado;
     }
@@ -267,6 +329,9 @@ import java.io.FileNotFoundException;
     }
 }
 
+
+
+
 public class TP4Game{
     public static String lerId(String linha){
         int i = 0;
@@ -302,7 +367,7 @@ public class TP4Game{
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String chave = "40800"; //scanner.nextLine();
+        String chave = "866800"; //scanner.nextLine();
 
         File file = new File("games.csv");
         Scanner scanearArquivo = null;
@@ -320,7 +385,7 @@ public class TP4Game{
        while(!(lerId(linha).equals(chave))){
         linha = scanearArquivo.nextLine();
        }
-       System.out.println(linha); // so pra teste
+
        Game game = new Game();
         game.setId(separador(linha)[0]);
         game.setName(separador(linha)[1]);
@@ -330,15 +395,14 @@ public class TP4Game{
         game.setSupportedLanguages(separador(linha)[5]);
         game.setMetacriticScore(separador(linha)[6]);
         game.setUserScore(separador(linha)[7]);
-        game.setAchievement(separador(linha)[8]);
+        game.setAchievement(separador(linha)[8]);   
         game.setPublisher(separador(linha)[9]);
         game.setDevelopers(separador(linha)[10]);
         game.setCategories(separador(linha)[11]);
         game.setGenres(separador(linha)[12]);
         game.setTags(separador(linha)[13]);
 
-        // System.out.println(separador(linha)[9]);
-       game.imprimir();
+        game.imprimir();
         
     }
 }
