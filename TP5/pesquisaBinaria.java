@@ -333,10 +333,8 @@ import java.io.FileNotFoundException;
 }
 
 
-
-
-public class TP4Game{
-    public static String lerId(String linha){
+public class pesquisaBinaria {
+     public static String lerId(String linha){
         int i = 0;
         String resultado = "";
         while(linha.charAt(i) != ','){
@@ -368,13 +366,27 @@ public class TP4Game{
         return resultado;
     }
 
+    public static void FpesquisaBinaria(Game[] game){
+        boolean resp = false; 
+        int dir = n - 1, esq = 0, meio; 
+        while (esq <= dir) {
+            meio = (esq + dir) / 2;
+            if (x == game[meio].getName){ 
+            resp = true; esq = n; 
+        }else if (x > game[meio].getName()){
+            esq = meio + 1;
+        }else {
+            dir = meio - 1;
+         } }
+    }
+
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
         String chave = scanner.nextLine();
         File file = new File("games.csv");
         Scanner scanearArquivo = null;
-        String[] vetor = new String[100];
+        Game[] game = new Game[100];
         
 
         while(!chave.equals("FIM")){
@@ -393,34 +405,35 @@ public class TP4Game{
 
        for(int i = 0; scanearArquivo.hasNextLine(); i++){
         linha = scanearArquivo.nextLine();
-
-        if(lerId(linha).equals(chave)){
-            achou = true;
-            break;
+        game[i].setId(separador(linhaa)[0]);
+        game[i].setName(separador(linha)[1]);
         }
-       }
 
-       if(achou == true){
-        System.out.println("SIM");
-        Game game = new Game();
-        game.setName(separador(linha)[1]);
-        vetor[i] = game.getName();
-       }else{
-        System.out.println("NAO");
-       }
-
-
+        
         chave = scanner.nextLine();
         scanearArquivo.close();
+       }
+
+
+
+
+       while(!chave.equals("FIM")){
+
+
+       String linha = null;
+       boolean achou = false;
+
+       for(int i = 0; scanearArquivo.hasNextLine(); i++){
+        linha = scanearArquivo.nextLine();
+        game[i].setId(separador(linhaa)[0]);
+        game[i].setName(separador(linha)[1]);
+        }
+
+        
+        chave = scanner.nextLine();
+        scanearArquivo.close();
+       }
     }
         
     }
-}
 
-
-
-
-
-public class pesquisaBinaria {
-    
-}
