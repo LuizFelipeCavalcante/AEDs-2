@@ -1,6 +1,9 @@
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 class Game {
 
@@ -20,7 +23,7 @@ class Game {
     private String[] tags;
 
     public Game() {
-    };
+    }
 
     public void setId(String id) {
         this.id = Integer.parseInt(id);
@@ -145,10 +148,12 @@ class Game {
     }
 
     public void setAchievement(String achievements) {
-        if (achievements.equals("")) {
+        String s = achievements.trim();
+        if (s.isEmpty()) {
             this.achievements = 0;
+            return;
         }
-        this.achievements = Integer.parseInt(achievements);
+        this.achievements = Integer.parseInt(s);
     }
 
     public void setPublisher(String publishers) {
@@ -160,7 +165,6 @@ class Game {
         for (int i = 0; i < partes.length; i++) {
 
             this.publishers[i] = partes[i];
-            // System.out.println(this.publishers[i] + ".");
         }
 
     }
@@ -332,6 +336,9 @@ class Game {
 }
 
 public class pesquisaBinaria {
+
+    private static long comparacoes = 0;
+
     public static String lerId(String linha) {
         int i = 0;
         String resultado = "";
@@ -401,6 +408,8 @@ public class pesquisaBinaria {
             int meio = (esq + dir) / 2;
             int cmp = x.compareTo(game[meio].getName());
 
+            comparacoes++;
+
             if (cmp == 0) {
                 resp = true;
                 break;
@@ -454,7 +463,10 @@ public class pesquisaBinaria {
         }
 
         quicksort(0, counter - 1, game);
+        
         chave = scanner.nextLine();
+        
+        long startTime = System.nanoTime();
 
         while (!chave.equals("FIM")) {
 
@@ -462,7 +474,29 @@ public class pesquisaBinaria {
             System.out.println(achou ? " SIM" : " NAO");
             chave = scanner.nextLine();
         }
+        
+        long endTime = System.nanoTime();
+        long tempoExecucaoMs = (endTime - startTime) / 1_000_000;
+
+
+        String matricula = "00879283"; 
+        String nomeLogFinal = matricula + "_binaria.txt";
+
+        try (
+            FileWriter fileWriter = new FileWriter(nomeLogFinal);
+            PrintWriter printWriter = new PrintWriter(fileWriter)
+        ) {
+            String logFinal = String.format("%s\t%d\t%d\t%d",
+                                                matricula,
+                                                comparacoes, 
+                                                0L,          
+                                                tempoExecucaoMs); 
+
+            printWriter.println(logFinal);
+
+        } catch (IOException e) {
+        }
+
         scanner.close();
     }
-
 }

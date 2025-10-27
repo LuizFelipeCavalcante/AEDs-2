@@ -1,6 +1,10 @@
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 
 class Game {
 
@@ -20,13 +24,13 @@ class Game {
     private String[] tags;
 
     public Game() {
-    };
+    }
 
     public void setId(String id) {
         this.id = Integer.parseInt(id);
     }
 
-    public int getId(){
+    public int getId() {
         return this.id;
     }
 
@@ -36,6 +40,10 @@ class Game {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getReleaseDate() {
+        return this.releaseDate;
     }
 
     public void setReleaseDate(String releaseDate) {
@@ -116,7 +124,8 @@ class Game {
 
         this.estimatedOwners = Integer.parseInt(resultado);
     }
-    public int getEstimatedOwners(){
+
+    public int getEstimatedOwners() {
         return this.estimatedOwners;
     }
 
@@ -152,10 +161,12 @@ class Game {
     }
 
     public void setAchievement(String achievements) {
-        if (achievements.equals("")) {
-            this.achievements = 0;
+        String s = achievements.trim();
+        if (s.isEmpty()) { 
+             this.achievements = 0;
+             return; 
         }
-        this.achievements = Integer.parseInt(achievements);
+        this.achievements = Integer.parseInt(s);
     }
 
     public void setPublisher(String publishers) {
@@ -167,7 +178,6 @@ class Game {
         for (int i = 0; i < partes.length; i++) {
 
             this.publishers[i] = partes[i];
-            // System.out.println(this.publishers[i] + ".");
         }
 
     }
@@ -201,7 +211,7 @@ class Game {
     }
 
     public void setGenres(String genres) {
-        String str = removeAspas(genres); 
+        String str = removeAspas(genres);
         genres = removeColchete(str);
         str = removeAspasSimples(genres);
         genres = removeEspacoEntreVirgulas(str);
@@ -219,7 +229,7 @@ class Game {
     public void setTags(String tags) {
         String str = removeAspas(tags);
         tags = removeColchete(str);
-        str = tags;//removeAspasSimples(tags);
+        str = tags;
         tags = removeEspacoEntreVirgulas(str);
 
         String[] partes = separadorVirgula(tags);
@@ -228,14 +238,14 @@ class Game {
         this.tags = new String[tam];
 
         for (int i = 0; i < tam; i++) {
-            
+
             this.tags[i] = partes[i];
         }
     }
 
     public void imprimir() {
         String e = " ## ";
-        System.out.println("=> " + String.valueOf(this.id) + e + this.name + e + this.releaseDate + e
+        MyIO.println("=> " + String.valueOf(this.id) + e + this.name + e + this.releaseDate + e
                 + String.valueOf(this.estimatedOwners)
                 + e + String.valueOf(this.price) + e + "[" + imprimirArrayVirgula(this.supportedLanguages) + "]" + e
                 + String.valueOf(this.metacriticScore)
@@ -300,23 +310,23 @@ class Game {
     }
 
     private String removeEspacoEntreVirgulas(String str) {
-    String resultado = "";
-    boolean anteriorEraVirgula = false;
+        String resultado = "";
+        boolean anteriorEraVirgula = false;
 
-    for (int i = 0; i < str.length(); i++) {
-        char atual = str.charAt(i);
+        for (int i = 0; i < str.length(); i++) {
+            char atual = str.charAt(i);
 
-        if (atual == ' ' && anteriorEraVirgula) {
-        
-        } else {
+            if (atual == ' ' && anteriorEraVirgula) {
 
-            resultado += atual;
+            } else {
+
+                resultado += atual;
+            }
+
+            anteriorEraVirgula = (atual == ',');
         }
-
-        anteriorEraVirgula = (atual == ',');
+        return resultado;
     }
-    return resultado;
-}
 
     private String[] separadorVirgula(String str) {
         int tam = 0;
@@ -344,9 +354,11 @@ class Game {
 }
 
 
-
-
 public class heapSortGame {
+
+    private static long comparacoes = 0;
+    private static long movimentacoes = 0;
+
     public static String lerId(String linha) {
         int i = 0;
         String resultado = "";
@@ -385,92 +397,67 @@ public class heapSortGame {
         Game temp = array[i];
         array[i] = array[j];
         array[j] = temp;
+        movimentacoes += 3; 
     }
 
-    
 
     public static void heapsort(Game[] array, int n) {
-   
-    for (int i = n / 2 - 1; i >= 0; i--) {
-        maxHeapify(array, n, i);
+
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            maxHeapify(array, n, i);
+        }
+
+        for (int i = n - 1; i > 0; i--) {
+
+            swap(array, 0, i);
+
+            maxHeapify(array, i, 0);
+        }
     }
 
-    for (int i = n - 1; i > 0; i--) {
-    
-        swap(array, 0, i);
+    private static boolean isPriorLarger(Game gameA, Game gameB) {
+        // Logica: maior EstimatedOwners, se igual, maior ID
+        comparacoes++;
+        if (gameA.getEstimatedOwners() > gameB.getEstimatedOwners()) {
+            return true;
+        }
+        if (gameA.getEstimatedOwners() < gameB.getEstimatedOwners()) {
+            return false;
+        }
 
-        maxHeapify(array, i, 0);
-    }
+        comparacoes++;
+        if (gameA.getId() > gameB.getId()) {
+            return true;
+        }
+
+        return false;
     }
 
 
     private static void maxHeapify(Game[] array, int heapSize, int i) {
-    int largest = i;
-    int left = 2 * i + 1; 
-    int right = 2 * i + 2; 
+        int largest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
 
-    if (left < heapSize && array[left] != null) {
-        
-
-        if (array[left].getEstimatedOwners() > array[largest].getEstimatedOwners()) {
-            largest = left;
-            
-        } else if (array[left].getEstimatedOwners() == array[largest].getEstimatedOwners()) {
-            
-            int idLeft = array[left].getId();
-            int idLargest = array[largest].getId();
-            
-            if (idLeft > idLargest) {
+        if (left < heapSize && array[left] != null) {
+            if (isPriorLarger(array[left], array[largest])) {
                 largest = left;
             }
         }
-    }
 
-    if (right < heapSize && array[right] != null) {
-        
-        if (array[right].getEstimatedOwners() > array[largest].getEstimatedOwners()) {
-            largest = right;
-            
-
-        } else if (array[right].getEstimatedOwners() == array[largest].getEstimatedOwners()) {
-            
-
-            int idRight = array[right].getId();
-            int idLargest = array[largest].getId();
-            
-            if (idRight > idLargest) {
+        if (right < heapSize && array[right] != null) {
+            if (isPriorLarger(array[right], array[largest])) {
                 largest = right;
             }
         }
-    }
 
 
-    if (largest != i) {
-        swap(array, i, largest);
-        maxHeapify(array, heapSize, largest);
-    }
-}
-
-    public static boolean FpesquisaBinaria(Game[] game, String x, int tam) {
-        boolean resp = false;
-        int esq = 0, dir = tam - 1;
-
-        while (esq <= dir) {
-            int meio = (esq + dir) / 2;
-            int cmp = x.compareTo(game[meio].getName());
-
-            if (cmp == 0) {
-                resp = true;
-                break;
-            } else if (cmp > 0) {
-                esq = meio + 1;
-            } else {
-                dir = meio - 1;
-            }
+        if (largest != i) {
+            swap(array, i, largest);
+            maxHeapify(array, heapSize, largest);
         }
-
-        return resp;
     }
+
 
     public static void main(String[] args) {
 
@@ -478,10 +465,16 @@ public class heapSortGame {
         String chave = scanner.nextLine();
         File file = new File("/tmp/games.csv");
         Scanner scanearArquivo = null;
-        Game[] game = new Game[100];
+
+        StringBuilder chavesDigitadas = new StringBuilder();
+
         int counter = 0;
 
+
         while (!chave.equals("FIM")) {
+
+            chavesDigitadas.append(chave).append('\n');
+
 
             try {
                 scanearArquivo = new Scanner(file);
@@ -491,29 +484,13 @@ public class heapSortGame {
                 return;
             }
 
+
             String linha = scanearArquivo.nextLine();
 
             while (scanearArquivo.hasNextLine()) {
-
                 linha = scanearArquivo.nextLine();
 
                 if (chave.equals(separador(linha)[0])) {
-                    game[counter] = new Game();
-                    game[counter].setId(separador(linha)[0]);
-                    game[counter].setName(separador(linha)[1]);
-                    game[counter].setReleaseDate(separador(linha)[2]);
-                    game[counter].setEstimatedOwners(separador(linha)[3]);
-                    game[counter].setPrice(separador(linha)[4]);
-                    game[counter].setSupportedLanguages(separador(linha)[5]);
-                    game[counter].setMetacriticScore(separador(linha)[6]);
-                    game[counter].setUserScore(separador(linha)[7]);
-                    game[counter].setAchievement(separador(linha)[8]);
-                    game[counter].setPublisher(separador(linha)[9]);
-                    game[counter].setDevelopers(separador(linha)[10]);
-                    game[counter].setCategories(separador(linha)[11]);
-                    game[counter].setGenres(separador(linha)[12]);
-                    game[counter].setTags(separador(linha)[13]);
-
                     counter++;
                     break;
                 }
@@ -523,13 +500,92 @@ public class heapSortGame {
             chave = scanner.nextLine();
         }
 
+
+        Game[] game = new Game[counter];
+        int indiceGame = 0;
+
+
+        Scanner leitorDeChaves = new Scanner(chavesDigitadas.toString());
+
+        while (leitorDeChaves.hasNextLine()) {
+            chave = leitorDeChaves.nextLine();
+
+            try {
+                scanearArquivo = new Scanner(file);
+            } catch (FileNotFoundException e) {
+                System.out.println("Erro ao reabrir o arquivo: " + e.getMessage());
+                e.printStackTrace();
+                return;
+            }
+
+            String linha = scanearArquivo.nextLine();
+
+            while (scanearArquivo.hasNextLine()) {
+                linha = scanearArquivo.nextLine();
+
+                if (chave.equals(separador(linha)[0])) {
+                    String[] campos = separador(linha); 
+
+                    game[indiceGame] = new Game();
+                    game[indiceGame].setId(campos[0]);
+                    game[indiceGame].setName(campos[1]);
+                    game[indiceGame].setReleaseDate(campos[2]);
+                    game[indiceGame].setEstimatedOwners(campos[3]);
+                    game[indiceGame].setPrice(campos[4]);
+                    game[indiceGame].setSupportedLanguages(campos[5]);
+                    game[indiceGame].setMetacriticScore(campos[6]);
+                    game[indiceGame].setUserScore(campos[7]);
+                    game[indiceGame].setAchievement(campos[8]);
+                    game[indiceGame].setPublisher(campos[9]);
+                    game[indiceGame].setDevelopers(campos[10]);
+                    game[indiceGame].setCategories(campos[11]);
+                    game[indiceGame].setGenres(campos[12]);
+                    game[indiceGame].setTags(campos[13]);
+
+                    indiceGame++;
+                    break;
+                }
+            }
+            scanearArquivo.close();
+        }
+        leitorDeChaves.close();
+
+        
+
+        long startTime = System.nanoTime();
+
         heapsort(game, counter);
 
-        for(int i = 0; i < counter; i++){
+        long endTime = System.nanoTime();
+
+        long tempoExecucaoMs = (endTime - startTime) / 1_000_000;
+
+        
+        for (int i = 0; i < counter; i++) {
             game[i].imprimir();
         }
+        
+       
+        String matricula = "00879283"; 
+        String nomeLogFinal = matricula + "_heapsort.txt";
+
+        try (
+            FileWriter fileWriter = new FileWriter(nomeLogFinal);
+            PrintWriter printWriter = new PrintWriter(fileWriter)
+        ) {
+            String logFinal = String.format("%s\t%d\t%d\t%d",
+                                                matricula,
+                                                comparacoes,
+                                                movimentacoes,
+                                                tempoExecucaoMs);
+
+            printWriter.println(logFinal);
+
+        } catch (IOException e) {
+            System.err.println("Erro ao escrever arquivo de log: " + e.getMessage());
+        }
+
 
         scanner.close();
     }
-
 }
