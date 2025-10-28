@@ -344,7 +344,7 @@ class Lista{
     }
 
     public void inserirInicio(Game game){
-        if(n >= array.Length){}
+        if(this.n >= array.Length){}
         else{
         for(int i = n; i > 0; i--){
             array[i] = array[i-1];
@@ -389,7 +389,7 @@ class Lista{
     }
 
     public Game removerFim(){
-        if(n == 0){}
+        if(n == 0){Enviroment.Exit(0);}
         else{
         return array[--n];
         }
@@ -397,7 +397,7 @@ class Lista{
 
     public Game remover(int pos){
         if(n == 0 || pos < 0 || pos > n){
-
+            Enviroment.Exit(0);
         }else{
         int resposta = array[pos];
         n--;
@@ -405,6 +405,7 @@ class Lista{
            array[i] = array[i+1];
         }
         return resposta;
+        }   
     }
 
     public void mostrar(){
@@ -413,7 +414,7 @@ class Lista{
         }
     }
 }
-}
+
 
 
 public class listaSequencial{
@@ -449,28 +450,18 @@ public class listaSequencial{
         return resultado;
     }
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        String chave = "866800"; //scanner.nextLine();
-
+    public static Game buscarNome(String name){
         File file = new File("games.csv");
         Scanner scanearArquivo = null;
 
-        try{
         scanearArquivo = new Scanner(file);
-       } catch(FileNotFoundException e){
-            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
-            e.printStackTrace();
-            return;
-       }
 
        String linha = scanearArquivo.nextLine();
 
-       while(!(lerId(linha).equals(chave))){
+       while(!((separador(linha)[1]).equals(name))){
         linha = scanearArquivo.nextLine();
        }
-
-       Game game = new Game();
+        Game game = new Game();
         game.setId(separador(linha)[0]);
         game.setName(separador(linha)[1]);
         game.setReleaseDate(separador(linha)[2]);
@@ -485,8 +476,67 @@ public class listaSequencial{
         game.setCategories(separador(linha)[11]);
         game.setGenres(separador(linha)[12]);
         game.setTags(separador(linha)[13]);
+       
+        scanearArquivo.close();
+        return game;
+    }
 
-        game.imprimir();
-        
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String chave = scanner.nextLine();
+
+        File file = new File("games.csv");
+        Scanner scanearArquivo = null;
+        Game[] game = new Game[100];
+        int contador = 0;
+
+        while(!chave.equals("FIM")){
+        try{
+        scanearArquivo = new Scanner(file);
+       } catch(FileNotFoundException e){
+            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+            e.printStackTrace();
+            return;
+       }
+
+       String linha = scanearArquivo.nextLine();
+
+       while(!(lerId(linha).equals(chave))){
+        linha = scanearArquivo.nextLine();
+       }
+
+        game[contador] = new Game();
+        game[contador].setId(separador(linha)[0]);
+        game[contador].setName(separador(linha)[1]);
+        game[contador].setReleaseDate(separador(linha)[2]);
+        game[contador].setEstimatedOwners(separador(linha)[3]);
+        game[contador].setPrice(separador(linha)[4]);
+        game[contador].setSupportedLanguages(separador(linha)[5]);
+        game[contador].setMetacriticScore(separador(linha)[6]);
+        game[contador].setUserScore(separador(linha)[7]);
+        game[contador].setAchievement(separador(linha)[8]);   
+        game[contador].setPublisher(separador(linha)[9]);
+        game[contador].setDevelopers(separador(linha)[10]);
+        game[contador].setCategories(separador(linha)[11]);
+        game[contador].setGenres(separador(linha)[12]);
+        game[contador].setTags(separador(linha)[13]);
+
+        chave = scanner.nextLine();
+        scanearArquivo = null;
+
+        contador++;
+    }
+    int n = scanner.nextLine();
+
+    for(int i = 0; i < n; i++){
+        String entrada = scanner.nextLine();
+        if(entrada.equals("II")){
+            entrada = scanner.nextLine();
+            Game games = buscarNome(entrada);
+            Lista.inserirInicio(games);
+        }else if(entrada.equals("")){
+
+        }
+    }
     }
 }

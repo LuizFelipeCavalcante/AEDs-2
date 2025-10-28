@@ -367,10 +367,12 @@ public class TP4Game{
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String chave = "866800"; //scanner.nextLine();
+        String chave = scanner.nextLine();
 
         File file = new File("games.csv");
         Scanner scanearArquivo = null;
+
+        while(!chave.equals("FIM")){
 
         try{
         scanearArquivo = new Scanner(file);
@@ -404,5 +406,9 @@ public class TP4Game{
 
         game.imprimir();
         
+        
+        chave = scanner.nextLine();
+        scanearArquivo = null;
+    }
     }
 }

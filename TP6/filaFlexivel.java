@@ -366,32 +366,32 @@ class Lista{
     //     temp = null;
     // }
 
-    public int removerFim(){
-        if(primeiro == ultimo){
-            return 0;
-        }else{
-            Celula i;
-        for(i = primeiro; i.prox != ultimo; i = i.prox);
-            int elemento = ultimo.elemento;
-            ultimo = i;
-            i = ultimo.prox = null;
-        
-            return elemento;
-        }
-    }
-
-    // public int removerInicio(){
-    //     if(ultimo == primeiro){
+    // public int removerFim(){
+    //     if(primeiro == ultimo){
     //         return 0;
     //     }else{
-    //         Celula tmp = primeiro.prox;
-    //         primeiro.prox = tmp.prox;
-    //         int resultado = tmp.elemento;
-    //         tmp.prox = null;
-    //         tmp = null;
-    //         return resultado ;
+    //         Celula i;
+    //     for(i = primeiro; i.prox != ultimo; i = i.prox);
+    //         int elemento = ultimo.elemento;
+    //         ultimo = i;
+    //         i = ultimo.prox = null;
+        
+    //         return elemento;
     //     }
     // }
+
+    public int removerInicio(){
+        if(ultimo == primeiro){
+            return 0;
+        }else{
+            Celula tmp = primeiro.prox;
+            primeiro.prox = tmp.prox;
+            int resultado = tmp.elemento;
+            tmp.prox = null;
+            tmp = null;
+            return resultado ;
+        }
+    }
 
     // public int inserir(int x, int pos){
     //     int tamanho = tamanho();
@@ -421,7 +421,7 @@ class Lista{
 
 }
 
-public class pilhaFlexivel{
+public class filaFlexivel{
     public static String lerId(String linha){
         int i = 0;
         String resultado = "";
