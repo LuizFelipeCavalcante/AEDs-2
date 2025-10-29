@@ -2,7 +2,7 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 
- class Game{
+class Game{
 
     public int id;
     private String name;
@@ -28,74 +28,59 @@ import java.io.FileNotFoundException;
     public void setName(String name){
         this.name = name;
     }
+    public String getName(){
+        return this.name;
+    }
    
     public void setReleaseDate(String releaseDate){
-        String str = "";
-        str = removeAspas(releaseDate);
+        if(releaseDate == null || releaseDate.equals("")) {
+            this.releaseDate = "01/01/0000";
+            return;
+        }
+        String str = removeAspas(releaseDate);
+        if(str.length() < 7) { 
+            this.releaseDate = "01/01/0000";
+            return;
+        }
+
         String mes = "";
-        for(int i = 0; i < 3; i++){
-            mes = mes + str.charAt(i);
+        for(int i = 0; i < 3 && i < str.length(); i++){
+            mes += str.charAt(i);
         }
-        switch (mes) {
-            case "Jan": 
-            mes = "01";
-            break;
-            case "Feb":
-            mes = "02";
-            break;
-            case "Mar":
-            mes = "03";
-            break;
-            case "Apr":
-            mes = "04";
-            break;
-            case "May":
-            mes = "05";
-            break;
-            case "Jun":
-            mes = "06";
-            break;
-            case "Jul":
-            mes = "07";
-            break;
-            case "Aug":
-            mes = "08";
-            break;
-            case "Sep":
-            mes = "09";
-            break;
-            case "Oct":
-            mes = "10";
-            break;
-            case "Nov":
-            mes = "11";
-            break;
-            case "Dec":
-            mes = "12"; 
-            break;
-            default:
-            mes = "01";
-                break;
+        switch(mes){
+            case "Jan": mes="01"; break;
+            case "Feb": mes="02"; break;
+            case "Mar": mes="03"; break;
+            case "Apr": mes="04"; break;
+            case "May": mes="05"; break;
+            case "Jun": mes="06"; break;
+            case "Jul": mes="07"; break;
+            case "Aug": mes="08"; break;
+            case "Sep": mes="09"; break;
+            case "Oct": mes="10"; break;
+            case "Nov": mes="11"; break;
+            case "Dec": mes="12"; break;
+            default: mes="01";
         }
 
-        String ano = "";
-        String dia = "";
-        if(str.charAt(5) != ','){
-            dia = "" + str.charAt(4) + str.charAt(5);
-            for(int i = 8; i <= 11; i++){
-                ano = ano + str.charAt(i);
+        String dia="", ano="";
+        if(str.length() > 5 && str.charAt(5) != ','){
+            if(str.length() >= 12){
+                dia = "" + str.charAt(4) + str.charAt(5);
+                for(int i = 8; i <= 11; i++) ano += str.charAt(i);
+            } else {
+                dia="01"; ano="0000";
             }
-        }else{
-            dia = "0" + str.charAt(4);
-            for(int i = 7; i <= 10; i++){
-                ano = ano + str.charAt(i);
+        } else {
+            if(str.length() >= 11){
+                dia = "0" + str.charAt(4);
+                for(int i = 7; i <= 10; i++) ano += str.charAt(i);
+            } else {
+                dia="01"; ano="0000";
             }
         }
-
-        releaseDate = "";
-        releaseDate = dia + "/" + mes + "/" + ano;
-        this.releaseDate = releaseDate;
-        }
+        this.releaseDate = dia + "/" + mes + "/" + ano;
+    }
         
     
      
@@ -228,7 +213,14 @@ import java.io.FileNotFoundException;
             this.tags[i] = partes[i];
         }
     }
-    
+
+    public void imprimirVarios(int i){
+        String e = " ## ";
+        System.out.println("["+ String.valueOf(i) +"]"+"=> "+ String.valueOf(this.id) + e + this.name + e + this.releaseDate + e + String.valueOf(this.estimatedOwners)
+        + e + String.valueOf(this.price) + e + "[" + imprimirArrayVirgula(this.supportedLanguages) + "]" + e + String.valueOf(this.metacriticScore)
+        + e + String.valueOf(this.userScore) + e + String.valueOf(this.achievements) + e + "["+ imprimirArray(this.publishers)+"]"
+        + e + "["+ imprimirArray(this.developers) + "]"+ e +"[" +imprimirArrayVirgula(this.categories) +"]" +e + "["+imprimirArray(this.genres) + "]"+e + "[" + imprimirArrayVirgula(this.tags)+"]");
+    }
 
     public void imprimir(){
         String e = " ## ";
@@ -328,6 +320,7 @@ import java.io.FileNotFoundException;
         return resultado;
     }
 }
+
 
 class Celula{
     public Game elemento;

@@ -28,74 +28,59 @@ import java.io.FileNotFoundException;
     public void setName(String name){
         this.name = name;
     }
+    public String getName(){
+        return this.name;
+    }
    
     public void setReleaseDate(String releaseDate){
-        String str = "";
-        str = removeAspas(releaseDate);
+        if(releaseDate == null || releaseDate.equals("")) {
+            this.releaseDate = "01/01/0000";
+            return;
+        }
+        String str = removeAspas(releaseDate);
+        if(str.length() < 7) { 
+            this.releaseDate = "01/01/0000";
+            return;
+        }
+
         String mes = "";
-        for(int i = 0; i < 3; i++){
-            mes = mes + str.charAt(i);
+        for(int i = 0; i < 3 && i < str.length(); i++){
+            mes += str.charAt(i);
         }
-        switch (mes) {
-            case "Jan": 
-            mes = "01";
-            break;
-            case "Feb":
-            mes = "02";
-            break;
-            case "Mar":
-            mes = "03";
-            break;
-            case "Apr":
-            mes = "04";
-            break;
-            case "May":
-            mes = "05";
-            break;
-            case "Jun":
-            mes = "06";
-            break;
-            case "Jul":
-            mes = "07";
-            break;
-            case "Aug":
-            mes = "08";
-            break;
-            case "Sep":
-            mes = "09";
-            break;
-            case "Oct":
-            mes = "10";
-            break;
-            case "Nov":
-            mes = "11";
-            break;
-            case "Dec":
-            mes = "12"; 
-            break;
-            default:
-            mes = "01";
-                break;
+        switch(mes){
+            case "Jan": mes="01"; break;
+            case "Feb": mes="02"; break;
+            case "Mar": mes="03"; break;
+            case "Apr": mes="04"; break;
+            case "May": mes="05"; break;
+            case "Jun": mes="06"; break;
+            case "Jul": mes="07"; break;
+            case "Aug": mes="08"; break;
+            case "Sep": mes="09"; break;
+            case "Oct": mes="10"; break;
+            case "Nov": mes="11"; break;
+            case "Dec": mes="12"; break;
+            default: mes="01";
         }
 
-        String ano = "";
-        String dia = "";
-        if(str.charAt(5) != ','){
-            dia = "" + str.charAt(4) + str.charAt(5);
-            for(int i = 8; i <= 11; i++){
-                ano = ano + str.charAt(i);
+        String dia="", ano="";
+        if(str.length() > 5 && str.charAt(5) != ','){
+            if(str.length() >= 12){
+                dia = "" + str.charAt(4) + str.charAt(5);
+                for(int i = 8; i <= 11; i++) ano += str.charAt(i);
+            } else {
+                dia="01"; ano="0000";
             }
-        }else{
-            dia = "0" + str.charAt(4);
-            for(int i = 7; i <= 10; i++){
-                ano = ano + str.charAt(i);
+        } else {
+            if(str.length() >= 11){
+                dia = "0" + str.charAt(4);
+                for(int i = 7; i <= 10; i++) ano += str.charAt(i);
+            } else {
+                dia="01"; ano="0000";
             }
         }
-
-        releaseDate = "";
-        releaseDate = dia + "/" + mes + "/" + ano;
-        this.releaseDate = releaseDate;
-        }
+        this.releaseDate = dia + "/" + mes + "/" + ano;
+    }
         
     
      
@@ -228,7 +213,14 @@ import java.io.FileNotFoundException;
             this.tags[i] = partes[i];
         }
     }
-    
+
+    public void imprimirVarios(int i){
+        String e = " ## ";
+        System.out.println("["+ String.valueOf(i) +"]"+"=> "+ String.valueOf(this.id) + e + this.name + e + this.releaseDate + e + String.valueOf(this.estimatedOwners)
+        + e + String.valueOf(this.price) + e + "[" + imprimirArrayVirgula(this.supportedLanguages) + "]" + e + String.valueOf(this.metacriticScore)
+        + e + String.valueOf(this.userScore) + e + String.valueOf(this.achievements) + e + "["+ imprimirArray(this.publishers)+"]"
+        + e + "["+ imprimirArray(this.developers) + "]"+ e +"[" +imprimirArrayVirgula(this.categories) +"]" +e + "["+imprimirArray(this.genres) + "]"+e + "[" + imprimirArrayVirgula(this.tags)+"]");
+    }
 
     public void imprimir(){
         String e = " ## ";
@@ -331,20 +323,20 @@ import java.io.FileNotFoundException;
 
 
 class Lista{
-    private int n;
+    public int n;
     private Game[] array;
 
     Lista(){
-        array = new int[6];
+        array = new Game[1000];
         n = 0;
     }
     Lista(int tamanho){
-        array = new int[tamanho];
+        array = new Game[tamanho];
         n = 0;
     }
 
     public void inserirInicio(Game game){
-        if(this.n >= array.Length){}
+        if(this.n >= array.length){}
         else{
         for(int i = n; i > 0; i--){
             array[i] = array[i-1];
@@ -355,17 +347,23 @@ class Lista{
     }
 
     public void inserirFim(Game game){
-        if(n >= array.length){
-
-        }else{
-            array[n] = game;
-            n++;
-        }
+    if(n >= array.length){
+    
+        Game[] novoArray = new Game[array.length * 2]; 
         
+    
+        for(int i = 0; i < n; i++){
+            novoArray[i] = array[i];
+        }
+        array = novoArray;
     }
+    
+    array[n] = game;
+    n++;
+}
 
     public void inserir(Game game, int pos){
-        if(n >= array.Length || pos < 0 || pos > n){}
+        if(n >= array.length || pos < 0 || pos > n){}
         else{
         for(int i = n; i > pos; i--){
             array[i] = array[i-1];
@@ -377,9 +375,9 @@ class Lista{
 
     public Game removerInicio(){
         if(n == 0){
-
+            return null;
         }else{
-        int resposta = array[0];
+        Game resposta = array[0];
         n--;
         for(int i = 0; i < n; i++){
            array[i] = array[i+1];
@@ -389,17 +387,17 @@ class Lista{
     }
 
     public Game removerFim(){
-        if(n == 0){Enviroment.Exit(0);}
+        if(n == 0){return null;}
         else{
         return array[--n];
         }
     }
 
     public Game remover(int pos){
-        if(n == 0 || pos < 0 || pos > n){
-            Enviroment.Exit(0);
+        if(n == 0 || pos < 0 || pos >= n){
+            return null;
         }else{
-        int resposta = array[pos];
+        Game resposta = array[pos];
         n--;
         for(int i = pos; i < n; i++){
            array[i] = array[i+1];
@@ -410,7 +408,7 @@ class Lista{
 
     public void mostrar(){
         for(int i = 0; i < n; i++){
-            System.out.println(array[i] + " ");
+            array[i].imprimirVarios(i);
         }
     }
 }
@@ -450,93 +448,141 @@ public class listaSequencial{
         return resultado;
     }
 
-    public static Game buscarNome(String name){
-        File file = new File("games.csv");
-        Scanner scanearArquivo = null;
+    public static Game buscarPorId(String id){
+        
+        File file = new File("/tmp/games.csv");
+        Scanner scanner = null;
 
-        scanearArquivo = new Scanner(file);
+       try {
+            scanner = new Scanner(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+            return null;
+        }
 
-       String linha = scanearArquivo.nextLine();
+        if (!scanner.hasNextLine()) {
+            scanner.close();
+            return null;
+        }
 
-       while(!((separador(linha)[1]).equals(name))){
-        linha = scanearArquivo.nextLine();
+        String linha = scanner.nextLine();
+
+       while(!((separador(linha)[0]).equals(id))){
+        linha = scanner.nextLine();
        }
+        String[] dados = separador(linha);
         Game game = new Game();
-        game.setId(separador(linha)[0]);
-        game.setName(separador(linha)[1]);
-        game.setReleaseDate(separador(linha)[2]);
-        game.setEstimatedOwners(separador(linha)[3]);
-        game.setPrice(separador(linha)[4]);
-        game.setSupportedLanguages(separador(linha)[5]);
-        game.setMetacriticScore(separador(linha)[6]);
-        game.setUserScore(separador(linha)[7]);
-        game.setAchievement(separador(linha)[8]);   
-        game.setPublisher(separador(linha)[9]);
-        game.setDevelopers(separador(linha)[10]);
-        game.setCategories(separador(linha)[11]);
-        game.setGenres(separador(linha)[12]);
-        game.setTags(separador(linha)[13]);
+        game.setId(dados[0]);
+        game.setName(dados[1]);
+        game.setReleaseDate(dados[2]);
+        game.setEstimatedOwners(dados[3]);
+        game.setPrice(dados[4]);
+        game.setSupportedLanguages(dados[5]);
+        game.setMetacriticScore(dados[6]);
+        game.setUserScore(dados[7]);
+        game.setAchievement(dados[8]);
+        game.setPublisher(dados[9]);
+        game.setDevelopers(dados[10]);
+        game.setCategories(dados[11]);
+        game.setGenres(dados[12]);
+        game.setTags(dados[13]);
        
-        scanearArquivo.close();
+        scanner.close();
         return game;
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+         Scanner scanner = new Scanner(System.in);
         String chave = scanner.nextLine();
+        File file = new File("/tmp/games.csv");
+        Lista lista = new Lista();
 
-        File file = new File("games.csv");
-        Scanner scanearArquivo = null;
-        Game[] game = new Game[100];
-        int contador = 0;
 
-        while(!chave.equals("FIM")){
-        try{
-        scanearArquivo = new Scanner(file);
-       } catch(FileNotFoundException e){
-            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
-            e.printStackTrace();
-            return;
-       }
+          while (!chave.equals("FIM")) {
+            Scanner scanearArquivo = null;
+            try {
+                scanearArquivo = new Scanner(file);
+            } catch (FileNotFoundException e) {
+                System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+                return;
+            }
 
-       String linha = scanearArquivo.nextLine();
+            if (!scanearArquivo.hasNextLine()) {
+                scanearArquivo.close();
+                break;
+            }
 
-       while(!(lerId(linha).equals(chave))){
-        linha = scanearArquivo.nextLine();
-       }
+            String linha = scanearArquivo.nextLine();
+            while (scanearArquivo.hasNextLine() && !lerId(linha).equals(chave)) {
+                linha = scanearArquivo.nextLine();
+            }
 
-        game[contador] = new Game();
-        game[contador].setId(separador(linha)[0]);
-        game[contador].setName(separador(linha)[1]);
-        game[contador].setReleaseDate(separador(linha)[2]);
-        game[contador].setEstimatedOwners(separador(linha)[3]);
-        game[contador].setPrice(separador(linha)[4]);
-        game[contador].setSupportedLanguages(separador(linha)[5]);
-        game[contador].setMetacriticScore(separador(linha)[6]);
-        game[contador].setUserScore(separador(linha)[7]);
-        game[contador].setAchievement(separador(linha)[8]);   
-        game[contador].setPublisher(separador(linha)[9]);
-        game[contador].setDevelopers(separador(linha)[10]);
-        game[contador].setCategories(separador(linha)[11]);
-        game[contador].setGenres(separador(linha)[12]);
-        game[contador].setTags(separador(linha)[13]);
+         String[] dados = separador(linha);
+            Game game = new Game();
+            game.setId(dados[0]);
+            game.setName(dados[1]);
+            game.setReleaseDate(dados[2]);
+            game.setEstimatedOwners(dados[3]);
+            game.setPrice(dados[4]);
+            game.setSupportedLanguages(dados[5]);
+            game.setMetacriticScore(dados[6]);
+            game.setUserScore(dados[7]);
+            game.setAchievement(dados[8]);
+            game.setPublisher(dados[9]);
+            game.setDevelopers(dados[10]);
+            game.setCategories(dados[11]);
+            game.setGenres(dados[12]);
+            game.setTags(dados[13]);
 
-        chave = scanner.nextLine();
-        scanearArquivo = null;
+            lista.inserirFim(game);
+            scanearArquivo.close();
+            chave = scanner.nextLine();
 
-        contador++;
     }
-    int n = scanner.nextLine();
-
+    int n = Integer.parseInt(scanner.nextLine());
+    
     for(int i = 0; i < n; i++){
-        String entrada = scanner.nextLine();
+        String entrada = scanner.next();
+        int pos = 0;
         if(entrada.equals("II")){
-            entrada = scanner.nextLine();
-            Game games = buscarNome(entrada);
-            Lista.inserirInicio(games);
-        }else if(entrada.equals("")){
+            entrada = scanner.next();
+            Game games = buscarPorId(entrada);
+            lista.inserirInicio(games);
+
+        }else if(entrada.equals("I*")){
+            pos = Integer.parseInt(scanner.next());
+            entrada = scanner.next();
+            Game games = buscarPorId(entrada);
+            lista.inserir(games, pos);
+
+        }else if(entrada.equals("IF")){
+            entrada = scanner.next();
+            Game games = buscarPorId(entrada);
+            lista.inserirFim(games);
+
+        }else if(entrada.equals("RI")){
+            Game removido = lista.removerInicio();
+            if (removido != null) {
+                System.out.println("(R) " + removido.getName());
+            }
+
+        }else if(entrada.equals("R*")){
+            pos = Integer.parseInt(scanner.next());
+            Game removido = lista.remover(pos);
+            if (removido != null) {
+                System.out.println("(R) " + removido.getName());
+            }
+
+        }else if(entrada.equals("RF")){
+            Game removido = lista.removerFim();
+            if (removido != null) {
+                System.out.println("(R) " + removido.getName());
+            }
 
         }
     }
+
+    lista.mostrar();
+    scanner.close();
     }
 }
