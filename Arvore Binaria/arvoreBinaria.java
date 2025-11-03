@@ -64,9 +64,8 @@ public class arvoreBinaria {
             altura = (alturaEsq > alturaDir) ? alturaEsq : alturaDir;
             return altura;
         }   
-        
-        return 0;
     }
+    
 
     
 }
