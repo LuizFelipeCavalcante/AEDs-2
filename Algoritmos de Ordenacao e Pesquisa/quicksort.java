@@ -1,7 +1,7 @@
 public class quicksort{
     public static void main(String[] arg){
         int[] array = {10,23,19,85,5};
-        quickSort(array, 0, array.length - 1);
+        fQuickSort(array, 0, array.length - 1);
 
         
         for (int n : array) {
@@ -29,7 +29,7 @@ public class quicksort{
             j--;
             }
             if(i <= j){
-                swap(j, i);
+                swap(array, j, i);
                 i++;
                 j--;
             }else{
@@ -37,10 +37,10 @@ public class quicksort{
             }
         }
         if (esq < j) {
-            quickSort(array, esq, j);
+            fQuickSort(array, esq, j);
         }
         if (i < dir) {
-            quickSort(array, i, dir);
+            fQuickSort(array, i, dir);
         }
     }
 }
