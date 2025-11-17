@@ -29,42 +29,46 @@ typedef struct {
     int tagCount;
 } Game;
 
-// Remove espaços do início e fim da string
+typedef struct Node {
+    Game game;
+    struct Node *next;
+} Node;
+
+Node *head = NULL;
+int sizeList = 0;
+
 void trim(char *str) {
-    int start = 0, end = strlen(str) - 1;
-    while(isspace(str[start])) start++;
-    while(end >= start && isspace(str[end])) end--;
+    int start = 0, end = (int)strlen(str) - 1;
+    while(start <= end && isspace((unsigned char)str[start])) start++;
+    while(end >= start && isspace((unsigned char)str[end])) end--;
     str[end+1] = '\0';
-    memmove(str, str+start, end-start+2);
+    if(start > 0) memmove(str, str+start, end-start+2);
 }
 
-// Mantém apenas dígitos
 void onlyDigits(char *dest, const char *src) {
     int j = 0;
     for(int i = 0; src[i] && j < MAX_STR-1; i++)
-        if(isdigit(src[i])) dest[j++] = src[i];
+        if(isdigit((unsigned char)src[i])) dest[j++] = src[i];
     dest[j] = '\0';
 }
 
-// Converte texto de lista para array
 int parseList(char array[][MAX_STR], const char *text) {
     int count = 0;
     int i = 0, j = 0;
     char buffer[MAX_STR];
-    int len = strlen(text);
-
+    int len = (int)strlen(text);
     while(i < len) {
-        if(text[i]=='[' || text[i]=='\'') { i++; continue; }
-        if(text[i]==']') { 
+        if(text[i]=='[' || text[i]=='\'' || text[i]=='\"') { i++; continue; }
+        if(text[i]==']') {
             if(j>0){ buffer[j]='\0'; strcpy(array[count++], buffer); trim(array[count-1]); j=0; }
-            break; 
+            break;
         }
-        if(text[i]==',' && j>0) { 
-            buffer[j]='\0'; 
-            strcpy(array[count++], buffer); 
+        if(text[i]==',' && j>0) {
+            buffer[j]='\0';
+            strcpy(array[count++], buffer);
             trim(array[count-1]);
-            j=0; i++; while(text[i]==' ') i++; 
-            continue; 
+            j=0; i++; while(i<len && text[i]==' ') i++;
+            continue;
         }
         buffer[j++] = text[i++];
     }
@@ -73,8 +77,17 @@ int parseList(char array[][MAX_STR], const char *text) {
 }
 
 float normalizePrice(const char *priceStr) {
-    if(strcmp(priceStr, "Free to Play")==0 || strlen(priceStr)==0) return 0.0;
-    return atof(priceStr);
+    if(strcmp(priceStr, "Free to Play")==0 || strlen(priceStr)==0) return 0.0f;
+    char tmp[MAX_STR];
+    int k=0;
+    for(int i=0; priceStr[i] && k < MAX_STR-1; i++) {
+        if((priceStr[i]>='0' && priceStr[i]<='9') || priceStr[i]=='.' || priceStr[i]==',') {
+            tmp[k++]=priceStr[i]=='?'?'.':priceStr[i];
+        }
+    }
+    tmp[k]='\0';
+    for(int i=0;i<k;i++) if(tmp[i]==',') tmp[i]='.';
+    return atof(tmp);
 }
 
 int normalizeMetacritic(const char *score) {
@@ -83,7 +96,7 @@ int normalizeMetacritic(const char *score) {
 }
 
 float normalizeUserScore(const char *score) {
-    if(strlen(score)==0 || strcmp(score,"tbd")==0) return -1.0;
+    if(strlen(score)==0 || strcmp(score,"tbd")==0) return -1.0f;
     return atof(score);
 }
 
@@ -93,10 +106,9 @@ int normalizeAchievements(const char *ach) {
 }
 
 void normalizeDate(char *out, const char *in) {
-    char month[4];
-    int day, year;
-    sscanf(in, "%3s %d, %d", month, &day, &year);
-
+    char month[16];
+    int day = 1, year = 1970;
+    if(sscanf(in, "%15s %d, %d", month, &day, &year) < 3) { strcpy(out,"01/01/0000"); return; }
     int m = 1;
     if(strcmp(month,"Jan")==0) m=1; else if(strcmp(month,"Feb")==0) m=2;
     else if(strcmp(month,"Mar")==0) m=3; else if(strcmp(month,"Apr")==0) m=4;
@@ -104,7 +116,6 @@ void normalizeDate(char *out, const char *in) {
     else if(strcmp(month,"Jul")==0) m=7; else if(strcmp(month,"Aug")==0) m=8;
     else if(strcmp(month,"Sep")==0) m=9; else if(strcmp(month,"Oct")==0) m=10;
     else if(strcmp(month,"Nov")==0) m=11; else if(strcmp(month,"Dec")==0) m=12;
-
     sprintf(out,"%02d/%02d/%d", day, m, year);
 }
 
@@ -117,8 +128,8 @@ void printArray(char array[][MAX_STR], int count) {
     printf("]");
 }
 
-void printGame(Game *g) {
-    printf("=> %d ## %s ## %s ## %d ## %.2f ## ", g->id, g->name, g->releaseDate, g->estimatedOwners, g->price);
+void printGameNoIndex(Game *g) {
+    printf("%d ## %s ## %s ## %d ## %.2f ## ", g->id, g->name, g->releaseDate, g->estimatedOwners, g->price);
     printArray(g->supportedLanguages, g->supportedLangCount);
     printf(" ## %d ## %.1f ## %d ## ", g->metacriticScore, g->userScore, g->achievements);
     printArray(g->publishers, g->publisherCount);
@@ -133,59 +144,203 @@ void printGame(Game *g) {
     printf(" ##\n");
 }
 
-int main() {
-    char idBuscado[MAX_STR];
-    while(1) {
-        fgets(idBuscado, MAX_STR, stdin);
-        idBuscado[strcspn(idBuscado,"\n")]=0;
-        if(strcmp(idBuscado,"FIM")==0) break;
-        FILE *fp = fopen("/tmp/games.csv","r");
-        if(!fp){ printf("Arquivo não encontrado\n"); return 1; }
-        char line[2048];
-        fgets(line,2048,fp); // Ignora cabeçalho
-        while(fgets(line,2048,fp)) {
-            char *campos[14];
-            int campoIndex=0;
-            static char buffer[2048];
-            int bufIndex=0;
-            int inQuotes=0;
-            for(int i=0; line[i]; i++) {
-                if(line[i]=='"') inQuotes = !inQuotes;
-                else if(line[i]==',' && !inQuotes) {
-                    buffer[bufIndex]='\0';
-                    campos[campoIndex] = malloc(strlen(buffer)+1);
-                    strcpy(campos[campoIndex], buffer);
-                    campoIndex++;
-                    bufIndex=0;
-                } else buffer[bufIndex++]=line[i];
+Game readGameFromCSVById(const char *idStr, int *found) {
+    Game gtemp;
+    *found = 0;
+    FILE *fp = fopen("/tmp/games.csv","r");
+    if(!fp) return gtemp;
+    char line[4096];
+    if(!fgets(line,4096,fp)) { fclose(fp); return gtemp; }
+    while(fgets(line,4096,fp)) {
+        char *campos[20];
+        int campoIndex=0;
+        static char buffer[4096];
+        int bufIndex=0;
+        int inQuotes=0;
+        for(int i=0; line[i] && line[i] != '\n'; i++) {
+            if(line[i]=='"') {
+                inQuotes = !inQuotes;
+            } else if(line[i]==',' && !inQuotes) {
+                buffer[bufIndex]='\0';
+                campos[campoIndex] = malloc(strlen(buffer)+1);
+                strcpy(campos[campoIndex], buffer);
+                campoIndex++;
+                bufIndex=0;
+            } else {
+                buffer[bufIndex++]=line[i];
             }
-            buffer[bufIndex]='\0';
-            campos[campoIndex]=malloc(strlen(buffer)+1);
-            strcpy(campos[campoIndex], buffer);
-            campoIndex++;
-
-            if(campoIndex>=14 && strcmp(campos[0],idBuscado)==0) {
-                Game g;
-                g.id = atoi(campos[0]);
-                strcpy(g.name, campos[1]);
-                normalizeDate(g.releaseDate, campos[2]);
-                char tmp[64]; onlyDigits(tmp, campos[3]);
-                g.estimatedOwners = atoi(tmp);
-                g.price = normalizePrice(campos[4]);
-                g.supportedLangCount = parseList(g.supportedLanguages, campos[5]);
-                g.metacriticScore = normalizeMetacritic(campos[6]);
-                g.userScore = normalizeUserScore(campos[7]);
-                g.achievements = normalizeAchievements(campos[8]);
-                g.publisherCount = parseList(g.publishers, campos[9]);
-                g.developerCount = parseList(g.developers, campos[10]);
-                g.categoryCount = parseList(g.categories, campos[11]);
-                g.genreCount = parseList(g.genres, campos[12]);
-                g.tagCount = parseList(g.tags, campos[13]);
-                printGame(&g);
-            }
-            for(int j=0;j<campoIndex;j++) free(campos[j]);
         }
-        fclose(fp);
+        buffer[bufIndex]='\0';
+        campos[campoIndex]=malloc(strlen(buffer)+1);
+        strcpy(campos[campoIndex], buffer);
+        campoIndex++;
+        if(campoIndex>=14 && strcmp(campos[0], idStr)==0) {
+            *found = 1;
+            memset(&gtemp,0,sizeof(Game));
+            gtemp.id = atoi(campos[0]);
+            strncpy(gtemp.name, campos[1], MAX_STR-1);
+            normalizeDate(gtemp.releaseDate, campos[2]);
+            char tmp[64]; onlyDigits(tmp, campos[3]);
+            gtemp.estimatedOwners = atoi(tmp);
+            gtemp.price = normalizePrice(campos[4]);
+            gtemp.supportedLangCount = parseList(gtemp.supportedLanguages, campos[5]);
+            gtemp.metacriticScore = normalizeMetacritic(campos[6]);
+            gtemp.userScore = normalizeUserScore(campos[7]);
+            gtemp.achievements = normalizeAchievements(campos[8]);
+            gtemp.publisherCount = parseList(gtemp.publishers, campos[9]);
+            gtemp.developerCount = parseList(gtemp.developers, campos[10]);
+            gtemp.categoryCount = parseList(gtemp.categories, campos[11]);
+            gtemp.genreCount = parseList(gtemp.genres, campos[12]);
+            gtemp.tagCount = parseList(gtemp.tags, campos[13]);
+            for(int j=0;j<campoIndex;j++) free(campos[j]);
+            break;
+        }
+        for(int j=0;j<campoIndex;j++) free(campos[j]);
+    }
+    fclose(fp);
+    return gtemp;
+}
+
+void inserirInicio(Game game) {
+    Node *n = (Node*)malloc(sizeof(Node));
+    n->game = game;
+    n->next = head;
+    head = n;
+    sizeList++;
+}
+
+void inserirFim(Game game) {
+    Node *n = (Node*)malloc(sizeof(Node));
+    n->game = game;
+    n->next = NULL;
+    if(head==NULL) { head = n; }
+    else {
+        Node *p = head;
+        while(p->next) p = p->next;
+        p->next = n;
+    }
+    sizeList++;
+}
+
+void inserir(Game game, int pos) {
+    if(pos < 0) pos = 0;
+    if(pos == 0) { inserirInicio(game); return; }
+    if(pos >= sizeList) { inserirFim(game); return; }
+    Node *n = (Node*)malloc(sizeof(Node));
+    n->game = game;
+    Node *p = head;
+    for(int i=0;i<pos-1;i++) p = p->next;
+    n->next = p->next;
+    p->next = n;
+    sizeList++;
+}
+
+Game removerInicio() {
+    Game ret;
+    memset(&ret,0,sizeof(Game));
+    if(head==NULL) return ret;
+    Node *r = head;
+    head = head->next;
+    ret = r->game;
+    free(r);
+    sizeList--;
+    return ret;
+}
+
+Game removerFim() {
+    Game ret;
+    memset(&ret,0,sizeof(Game));
+    if(head==NULL) return ret;
+    if(head->next==NULL) {
+        ret = head->game;
+        free(head);
+        head = NULL;
+        sizeList--;
+        return ret;
+    }
+    Node *p = head;
+    while(p->next->next) p = p->next;
+    Node *r = p->next;
+    ret = r->game;
+    p->next = NULL;
+    free(r);
+    sizeList--;
+    return ret;
+}
+
+Game remover(int pos) {
+    Game ret;
+    memset(&ret,0,sizeof(Game));
+    if(head==NULL) return ret;
+    if(pos <= 0) return removerInicio();
+    if(pos >= sizeList-1) return removerFim();
+    Node *p = head;
+    for(int i=0;i<pos-1;i++) p = p->next;
+    Node *r = p->next;
+    ret = r->game;
+    p->next = r->next;
+    free(r);
+    sizeList--;
+    return ret;
+}
+
+int main() {
+    char line[MAX_STR];
+    while(1) {
+        if(!fgets(line, MAX_STR, stdin)) return 0;
+        line[strcspn(line,"\n")] = 0;
+        trim(line);
+        if(strcmp(line,"FIM")==0) break;
+        if(strlen(line)==0) continue;
+        int found=0;
+        Game g = readGameFromCSVById(line, &found);
+        if(found) inserirFim(g);
+    }
+    if(!fgets(line, MAX_STR, stdin)) return 0;
+    trim(line);
+    int commands = atoi(line);
+    for(int i=0;i<commands;i++) {
+        if(!fgets(line, MAX_STR, stdin)) break;
+        line[strcspn(line,"\n")] = 0;
+        trim(line);
+        if(strlen(line)==0) { i--; continue; }
+        if(strncmp(line,"II ",3)==0) {
+            char idstr[MAX_STR];
+            sscanf(line+3,"%s",idstr);
+            int found=0;
+            Game g = readGameFromCSVById(idstr,&found);
+            if(found) inserirInicio(g);
+        } else if(strncmp(line,"IF ",3)==0) {
+            char idstr[MAX_STR];
+            sscanf(line+3,"%s",idstr);
+            int found=0;
+            Game g = readGameFromCSVById(idstr,&found);
+            if(found) inserirFim(g);
+        } else if(strncmp(line,"I* ",3)==0) {
+            int pos=0; char idstr[MAX_STR];
+            sscanf(line+3,"%d %s",&pos, idstr);
+            int found=0;
+            Game g = readGameFromCSVById(idstr,&found);
+            if(found) inserir(g, pos);
+        } else if(strcmp(line,"RI")==0) {
+            Game r = removerInicio();
+            printf("(R) %s\n", r.name);
+        } else if(strcmp(line,"RF")==0) {
+            Game r = removerFim();
+            printf("(R) %s\n", r.name);
+        } else if(strncmp(line,"R* ",3)==0) {
+            int pos=0;
+            sscanf(line+3,"%d",&pos);
+            Game r = remover(pos);
+            printf("(R) %s\n", r.name);
+        }
+    }
+    Node *p = head;
+    int idx = 0;
+    while(p) {
+        printf("[%d] => ", idx++);
+        printGameNoIndex(&p->game);
+        p = p->next;
     }
     return 0;
 }

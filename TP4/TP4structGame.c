@@ -18,40 +18,22 @@ typedef struct{
 }Game;
 
 void separador(char* str){
-    char resultado[100][14];
-    int aspas;
-    int j = 0;
+    char resultado
+    for(int i = 0; str[i] != "\0"; i++){
+        if(str[i] == ","){
 
-    for(int i = 0; i < 14; i++){
-        while((j < linha.length()) && (linha[j] != ',' || aspas == 1)){
-            if(linha[j] == '"'){
-                aspas ++;
-                if(aspas >= 2){aspas = 0;}
-            }
-            resultado[i] = resultado[i] + linha.charAt[j];
-            j++;
         }
-        j++;
-    
-        }
-        return resultado;
+    }
 }
 
 
 int main(){
-    FILE *arquivo;
-    arquivo = fopen("games.csv");
-
-    if (arquivo == NULL) {
-    printf("Erro ao abrir o arquivo.\n");
-    return 1; 
-    }
-
-    char linha[100];
-    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
-    
-    }
-
-    fclose(arquivo);
+   FILE *file;
+   file = fopen("games.csv", "r");
+   char linha[1000]; 
+   while(fgets(linha, 1000, file) != NULL){
+    printf("%s", linha);
+   }
+   
     return 0;
 }
