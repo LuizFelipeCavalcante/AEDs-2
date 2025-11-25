@@ -98,6 +98,10 @@ class Game{
             this.estimatedOwners = Integer.parseInt(resultado);
         }
 
+        public int getEstimatedOwners(){
+            return estimatedOwners % 15; 
+        }
+
         
         public void setPrice(String price){
             this.price = Float.parseFloat(price);
@@ -328,13 +332,15 @@ class NoName{
     String elemento;
     NoName esq, dir;
     NoName(){}
+    NoName(String elemento){this.elemento = elemento; esq = dir = null;}
 }
+
 class No{
     int elemento;
     No esq, dir;
     NoName ponteiro;
     No(){};
-    No(String game){this.elemento = game; ponteiro = esq = dir = null;}
+    No(int elemento){this.elemento = elemento; ponteiro = null;  esq = dir = null;}
 }
 
 class Arvore{
@@ -357,25 +363,89 @@ class Arvore{
         this.raiz = inserirRec(elemento, this.raiz);
     }
 
-    private String pesquisarRec(int elemento, No raiz ){
-        if(raiz == null)
-            return " NAO";
+    private NoName inserirRecName(String elemento, NoName raiz){
+        if(raiz == null || elemento.equals(raiz.elemento)){
+            return new NoName(elemento);
+        }
+        if((elemento.compareTo(raiz.elemento)) > 0)
+            raiz.dir = inserirRecName(elemento, raiz.dir);
+        if((elemento.compareTo(raiz.elemento)) < 0)
+            raiz.esq = inserirRecName(elemento, raiz.esq);
+        return raiz;
+    }
+
+    public void inserirName(int estimated, String nome){
+        NoName noDoNome = pesquisarNo(estimated, this.raiz);
+        noDoNome = inserirRecName(nome, noDoNome);
+        // mostrarNome(noDoNome);
+    }
+    private void mostrarNome(NoName raiz){
+        if(raiz == null){
+            return;
+        }
+        mostrarNome(raiz.esq);
+        System.out.print(" " + raiz.elemento);
+        mostrarNome(raiz.dir);
+    }
+
+    private NoName pesquisarNo(int elemento, No raiz){
+        // if(raiz == null)
+        //     return " NAO";
         if(elemento == raiz.elemento){
+            // System.out.println("raiz" + raiz.elemento + " ");
+            return raiz.ponteiro;
+        }else if(elemento > raiz.elemento){
+            return pesquisarNo(elemento, raiz.dir);
+        }else{
+            return pesquisarNo(elemento, raiz.esq);
+        }
+    }
+    boolean achou = false;
+    private String pesquisarName(String elemento, NoName raiz){
+        if(raiz == null){
+            this.achou = false;
+            return "";
+        }
+        if(raiz.elemento.equals(elemento)){
+            this.achou = true;
             return " SIM";
         }
-        if(elemento > raiz.elemento){
-            return " dir" + pesquisarRec(elemento, raiz.dir);
+        if(elemento.compareTo(raiz.elemento) > 0){
+            return " dir" + pesquisarName(elemento, raiz.dir);
         }else{
-            return " esq" + pesquisarRec(elemento, raiz.esq);
+            return " esq" + pesquisarName(elemento, raiz.esq);
         }
     }
 
-    public String pesquisar(int elemento){
-        return "raiz " + pesquisarRec(elemento, this.raiz);
+    private int pesquisarRec(No raiz, String name){
+        if(raiz == null){
+            return 1;
+        }
+        if(raiz.ponteiro !=  null){
+            String resultado = pesquisarName(name, raiz.ponteiro);
+            System.out.print(resultado);
+        }
+
+        if(pesquisarRec(raiz.esq, name) == 0){
+            System.out.print(" ESQ");
+        }
+
+        if(pesquisarRec(raiz.dir, name) == 0){
+            System.out.print(" DIR");
+        }
+
+        if(achou == false){
+            System.out.print(" NAO");
+        }   
+        return 0;
+    }
+
+    public void pesquisar(String elemento){
+        pesquisarRec(this.raiz, elemento);
     }
 
     private void mostrarRec(No raiz){
-        if(raiz == null){
+         if(raiz == null){
             return;
         }
         mostrarRec(raiz.esq);
@@ -436,6 +506,34 @@ public class arvoreDeArvores {
         Game game = new Game();
         game.setId(dados[0]);
         game.setName(dados[1]);
+        System.out.println(dados[3]);
+        game.setEstimatedOwners(dados[3]);
+       System.out.println(game.getEstimatedOwners());
+        scanner.close();
+        return game;
+    }
+
+    public static Game buscarPorName(String name){
+        File file = new File("games.csv");
+        Scanner scanner = null;
+
+        try {
+            scanner = new Scanner(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+            return null;
+        }
+
+        String line = scanner.nextLine();
+
+        while(!separador(line)[1].equals(name)){
+            line = scanner.nextLine();
+        }
+
+        String[] dados = separador(line);
+        Game game = new Game();
+        game.setName(dados[1]);
+        game.setEstimatedOwners(dados[3]);
        
         scanner.close();
         return game;
@@ -443,23 +541,50 @@ public class arvoreDeArvores {
 
     public static void main(String[] args){
 
-        Scanner scanner = new Scanner(System.in);
-        String str = scanner.nextLine();
+        File file = new File("pub (2).in");
+        Scanner scanner = null;
+
+        try {
+            scanner = new Scanner(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+        }
+
         Arvore arvore = new Arvore();
+
+        arvore.inserir(7);
+        arvore.inserir(3);
+        arvore.inserir(11);
+        arvore.inserir(1);
+        arvore.inserir(5);
+        arvore.inserir(9);
+        arvore.inserir(13);
+        arvore.inserir(0);
+        arvore.inserir(2);
+        arvore.inserir(4);
+        arvore.inserir(6);
+        arvore.inserir(8);
+        arvore.inserir(10);
+        arvore.inserir(12);
+        arvore.inserir(14);
+
+        String str = scanner.nextLine();
 
         while(!str.equals("FIM")){
             Game game = new Game();
             game = buscarPorId(str);
-            arvore.inserir(game.getName());
+            // System.out.println(game.getEstimatedOwners() + game.getName() + " ");
+            arvore.inserirName(game.getEstimatedOwners(), game.getName());
+
             str = scanner.nextLine();
         }
-
+        
         str = scanner.nextLine();
         while(!str.equals("FIM")){
-            System.out.println(str + ": =>" + arvore.pesquisar(str));
+            // arvore.pesquisar(str);
             str = scanner.nextLine();
         }
-
+        arvore.mostrar();
         scanner.close();
     }
 
