@@ -364,7 +364,7 @@ class Arvore{
     }
 
     private NoName inserirRecName(String elemento, NoName raiz){
-        if(raiz == null || elemento.equals(raiz.elemento)){
+        if(raiz == null){
             return new NoName(elemento);
         }
         if((elemento.compareTo(raiz.elemento)) > 0)
@@ -375,10 +375,14 @@ class Arvore{
     }
 
     public void inserirName(int estimated, String nome){
-        NoName noDoNome = pesquisarNo(estimated, this.raiz);
-        noDoNome = inserirRecName(nome, noDoNome);
-        // mostrarNome(noDoNome);
+        No noDoNome = pesquisarNo(estimated, this.raiz);
+        
+        if(noDoNome == null){
+        return;
+        }
+        noDoNome.ponteiro = inserirRecName(nome, noDoNome.ponteiro);
     }
+
     private void mostrarNome(NoName raiz){
         if(raiz == null){
             return;
@@ -388,60 +392,57 @@ class Arvore{
         mostrarNome(raiz.dir);
     }
 
-    private NoName pesquisarNo(int elemento, No raiz){
-        // if(raiz == null)
-        //     return " NAO";
+    private No pesquisarNo(int elemento, No raiz){
+        
         if(elemento == raiz.elemento){
-            // System.out.println("raiz" + raiz.elemento + " ");
-            return raiz.ponteiro;
+           
+            return raiz;
         }else if(elemento > raiz.elemento){
             return pesquisarNo(elemento, raiz.dir);
         }else{
             return pesquisarNo(elemento, raiz.esq);
         }
     }
-    boolean achou = false;
+
     private String pesquisarName(String elemento, NoName raiz){
         if(raiz == null){
-            this.achou = false;
-            return "";
+            return " NAO";
         }
         if(raiz.elemento.equals(elemento)){
-            this.achou = true;
-            return " SIM";
+        return " SIM";    
         }
         if(elemento.compareTo(raiz.elemento) > 0){
-            return " dir" + pesquisarName(elemento, raiz.dir);
+            
+            return "dir " + pesquisarName(elemento, raiz.dir);
         }else{
-            return " esq" + pesquisarName(elemento, raiz.esq);
+            return "esq " + pesquisarName(elemento, raiz.esq);
         }
     }
 
-    private int pesquisarRec(No raiz, String name){
+    private String pesquisarRec(No raiz, String name, int estimated){
         if(raiz == null){
-            return 1;
-        }
-        if(raiz.ponteiro !=  null){
-            String resultado = pesquisarName(name, raiz.ponteiro);
-            System.out.print(resultado);
+            return " NAO";
+            
         }
 
-        if(pesquisarRec(raiz.esq, name) == 0){
-            System.out.print(" ESQ");
+        if(estimated > raiz.elemento){
+            
+           return " DIR " + pesquisarRec(raiz.dir, name, estimated);
+
+        }else if(estimated < raiz.elemento){
+
+            return " ESQ " + pesquisarRec(raiz.esq, name, estimated);
+
+        }else{
+
+           return "" + pesquisarName (name, raiz.ponteiro);
+            
         }
 
-        if(pesquisarRec(raiz.dir, name) == 0){
-            System.out.print(" DIR");
-        }
-
-        if(achou == false){
-            System.out.print(" NAO");
-        }   
-        return 0;
     }
 
-    public void pesquisar(String elemento){
-        pesquisarRec(this.raiz, elemento);
+    public String pesquisar(String elemento, int estimated){
+        return "raiz " + pesquisarRec(this.raiz, elemento, estimated);
     }
 
     private void mostrarRec(No raiz){
@@ -486,7 +487,7 @@ public class arvoreDeArvores {
 
 
     public static Game buscarPorId(String id){
-        File file = new File("games.csv");
+        File file = new File("/tmp/games.csv");
         Scanner scanner = null;
 
         try {
@@ -506,15 +507,15 @@ public class arvoreDeArvores {
         Game game = new Game();
         game.setId(dados[0]);
         game.setName(dados[1]);
-        System.out.println(dados[3]);
+        
         game.setEstimatedOwners(dados[3]);
-       System.out.println(game.getEstimatedOwners());
+    
         scanner.close();
         return game;
     }
 
     public static Game buscarPorName(String name){
-        File file = new File("games.csv");
+        File file = new File("/tmp/games.csv");
         Scanner scanner = null;
 
         try {
@@ -541,14 +542,14 @@ public class arvoreDeArvores {
 
     public static void main(String[] args){
 
-        File file = new File("pub (2).in");
-        Scanner scanner = null;
+        // File file = new File("pub (2).in");
+        Scanner scanner = new Scanner(System.in);
 
-        try {
-            scanner = new Scanner(file);
-        } catch (FileNotFoundException e) {
-            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
-        }
+        // try {
+        //     scanner = new Scanner(file);
+        // } catch (FileNotFoundException e) {
+        //     System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+        // }
 
         Arvore arvore = new Arvore();
 
@@ -573,7 +574,7 @@ public class arvoreDeArvores {
         while(!str.equals("FIM")){
             Game game = new Game();
             game = buscarPorId(str);
-            // System.out.println(game.getEstimatedOwners() + game.getName() + " ");
+
             arvore.inserirName(game.getEstimatedOwners(), game.getName());
 
             str = scanner.nextLine();
@@ -581,10 +582,13 @@ public class arvoreDeArvores {
         
         str = scanner.nextLine();
         while(!str.equals("FIM")){
-            // arvore.pesquisar(str);
+            Game game = new Game();
+            game = buscarPorName(str);
+            System.out.println("=> " + game.getName() + " => " +arvore.pesquisar(str, game.getEstimatedOwners()));
+           
             str = scanner.nextLine();
         }
-        arvore.mostrar();
+        
         scanner.close();
     }
 
